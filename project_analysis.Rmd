@@ -16,7 +16,7 @@ library(caret)
 library(randomForest)
 library(ggplot2)
 
-# Define the URLs for the training and testing data
+# URLs for the training and testing data
 train_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
 test_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
 
@@ -24,11 +24,11 @@ test_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
 train_data <- read.csv(train_url)
 test_data <- read.csv(test_url)
 
-# Check the structure of the data
+# Check structure of the data
 str(train_data)
 str(test_data)
 
-# Remove columns with mostly NAs (more than 90% missing data)
+# Remove columns with mostly NAs 
 train_data_clean <- train_data[, colSums(is.na(train_data)) < nrow(train_data) * 0.9]
 test_data_clean <- test_data[, colSums(is.na(test_data)) < nrow(test_data) * 0.9]
 
@@ -46,7 +46,7 @@ trainIndex <- createDataPartition(train_data_clean$classe, p = 0.7, list = FALSE
 trainSet <- train_data_clean[trainIndex, ]
 validationSet <- train_data_clean[-trainIndex, ]
 
-# Train a Random Forest model using caret
+# Train Random Forest model using caret
 rf_model <- train(classe ~ ., data = trainSet, method = "rf", trControl = trainControl(method = "cv", number = 10))
 
 # Check model accuracy
