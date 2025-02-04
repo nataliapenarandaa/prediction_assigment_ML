@@ -1,5 +1,6 @@
 ---
 title: "Machine Learning Project: Exercise Prediction"
+autor: "Natalia Penaranda"
 output: html_document
 ---
 
