@@ -1,14 +1,13 @@
 ---
 title: "Machine Learning Project: Exercise Prediction"
 output: html_document
-
 ---
 
 ## Introduction
 
 In this project, we will build a machine learning model to predict the manner in which an individual performed an exercise. The target variable is `classe`, and various sensor data will be used as input features.
 
-##Load Data
+## Step 1: Load Data
 
 ```{r load-data, echo=TRUE}
 # Load necessary libraries
@@ -28,7 +27,7 @@ test_data <- read.csv(test_url)
 str(train_data)
 str(test_data)
 
-# Remove columns with mostly NAs 
+# Remove columns with mostly NAs (more than 90% missing data)
 train_data_clean <- train_data[, colSums(is.na(train_data)) < nrow(train_data) * 0.9]
 test_data_clean <- test_data[, colSums(is.na(test_data)) < nrow(test_data) * 0.9]
 
@@ -46,14 +45,28 @@ trainIndex <- createDataPartition(train_data_clean$classe, p = 0.7, list = FALSE
 trainSet <- train_data_clean[trainIndex, ]
 validationSet <- train_data_clean[-trainIndex, ]
 
-# Train Random Forest model using caret
-rf_model <- train(classe ~ ., data = trainSet, method = "rf", trControl = trainControl(method = "cv", number = 10))
+# Set up cross-validation
+train_control <- trainControl(method = "cv", number = 10)
 
-# Check model accuracy
+# Train a Random Forest model using caret
+set.seed(123)
+rf_model <- train(classe ~ ., data = trainSet, method = "rf", trControl = train_control)
+
+# Print model summary
 print(rf_model)
 
-# Use the model to make predictions on the test data
+# Use the trained model to make predictions on the validation set
+validation_predictions <- predict(rf_model, newdata = validationSet)
+
+# Evaluate the model on the validation set
+confusionMatrix(validation_predictions, validationSet$classe)
+
+
+# Use the trained model to make predictions on the test set
 test_predictions <- predict(rf_model, newdata = test_data_clean)
 
 # Evaluate the model on the test set
 confusionMatrix(test_predictions, test_data_clean$classe)
+
+rmarkdown::render("project_analysis.Rmd", output_format = "html_document")
+
