@@ -1,0 +1,13 @@
+# Load necessary libraries
+library(caret)
+library(randomForest)
+library(ggplot2)
+
+# Load training and test data
+train_data <- read.csv(train_url)
+test_data <- read.csv(test_url)
+
+# Train a Random Forest model
+set.seed(123)
+rf_model <- train(classe ~ ., data = train_data_clean, method = "rf", trControl = trainControl(method = "cv", number = 10))
+print(rf_model)
