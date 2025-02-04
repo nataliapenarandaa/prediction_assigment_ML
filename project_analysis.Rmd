@@ -1,0 +1,59 @@
+---
+title: "Machine Learning Project: Exercise Prediction"
+output: html_document
+
+---
+
+## Introduction
+
+In this project, we will build a machine learning model to predict the manner in which an individual performed an exercise. The target variable is `classe`, and various sensor data will be used as input features.
+
+##Load Data
+
+```{r load-data, echo=TRUE}
+# Load necessary libraries
+library(caret)
+library(randomForest)
+library(ggplot2)
+
+# Define the URLs for the training and testing data
+train_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+test_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+# Load the training and test data
+train_data <- read.csv(train_url)
+test_data <- read.csv(test_url)
+
+# Check the structure of the data
+str(train_data)
+str(test_data)
+
+# Remove columns with mostly NAs (more than 90% missing data)
+train_data_clean <- train_data[, colSums(is.na(train_data)) < nrow(train_data) * 0.9]
+test_data_clean <- test_data[, colSums(is.na(test_data)) < nrow(test_data) * 0.9]
+
+# Remove unnecessary columns (e.g., timestamp, user_id)
+train_data_clean <- train_data_clean[, -c(1, 2)]
+test_data_clean <- test_data_clean[, -c(1, 2)]
+
+# Convert 'classe' to a factor
+train_data_clean$classe <- as.factor(train_data_clean$classe)
+
+# Split the data into training (70%) and validation (30%) sets
+set.seed(123)  # Setting seed for reproducibility
+trainIndex <- createDataPartition(train_data_clean$classe, p = 0.7, list = FALSE)
+
+trainSet <- train_data_clean[trainIndex, ]
+validationSet <- train_data_clean[-trainIndex, ]
+
+# Train a Random Forest model using caret
+rf_model <- train(classe ~ ., data = trainSet, method = "rf", trControl = trainControl(method = "cv", number = 10))
+
+# Check model accuracy
+print(rf_model)
+
+# Use the model to make predictions on the test data
+test_predictions <- predict(rf_model, newdata = test_data_clean)
+
+# Evaluate the model on the test set
+confusionMatrix(test_predictions, test_data_clean$classe)
